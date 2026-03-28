@@ -178,6 +178,7 @@ router.get('/me', verifyToken, (req, res) => {
 // Alias for /me (for compatibility)
 router.get('/profile', verifyToken, (req, res) => {
   try {
+    const users = getUsers();
     const user = users.find(u => u.id === req.userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -206,6 +207,7 @@ router.get('/profile', verifyToken, (req, res) => {
 router.put('/update', verifyToken, (req, res) => {
   try {
     const { learningGoal, learningStyle } = req.body;
+    const users = getUsers();
     const user = users.find(u => u.id === req.userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });

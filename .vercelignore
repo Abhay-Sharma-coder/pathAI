@@ -1,0 +1,12 @@
+react-app/
+node_modules/
+.git/
+docs/
+*.md
+*.txt
+.env
+.env.local
+*.html
+*.css
+*.js
+!backend/**
