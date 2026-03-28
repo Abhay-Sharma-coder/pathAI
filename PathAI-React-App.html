@@ -1,0 +1,2831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PathAI - 3-Page Learning Platform</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0a0f1e;
+      --bg-secondary: #0f1628;
+      --bg-tertiary: #161f3a;
+      --bg-hover: #1e2a47;
+      --text-primary: #e4e4e7;
+      --text-secondary: #a1a1aa;
+      --cyan: #22d3ee;
+      --purple: #a78bfa;
+      --green: #10b981;
+      --border: #27354b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Navigation */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: rgba(15, 22, 40, 0.9);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      padding: 12px 20px;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
+    }
+
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--cyan);
+      text-decoration: none;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 30px;
+      flex: 1;
+    }
+
+    .nav-tab {
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      padding: 8px 0;
+      font-size: 1rem;
+      transition: color 0.3s;
+    }
+
+    .nav-tab.active {
+      color: var(--cyan);
+      border-bottom: 2px solid var(--cyan);
+    }
+
+    .nav-tab:hover {
+      color: var(--cyan);
+    }
+
+    .nav-user {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-name {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .btn-logout {
+      padding: 8px 20px;
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-logout:hover {
+      background-color: var(--bg-hover);
+      border-color: var(--cyan);
+    }
+
+    .btn-login {
+      padding: 8px 20px;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      color: #0a0f1e;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-login:hover {
+      box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 40px 20px;
+    }
+
+    /* Dashboard */
+    .dashboard-header h1 {
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+      font-size: 2rem;
+    }
+
+    .dashboard-header p {
+      color: var(--text-secondary);
+      margin-bottom: 30px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .stat-card:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 0 30px rgba(34, 211, 238, 0.2);
+      transform: translateY(-4px);
+    }
+
+    .stat-icon {
+      font-size: 2.5rem;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* Roadmap Page */
+    .roadmap-page {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 0;
+      height: calc(100vh - 60px);
+    }
+
+    .sidebar {
+      background-color: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      padding: 20px 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      padding: 0 16px 20px;
+      border-bottom: 1px solid var(--border);
+      color: var(--cyan);
+      font-weight: 600;
+    }
+
+    .sidebar-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 8px;
+    }
+
+    .sidebar-item {
+      padding: 12px 16px;
+      margin: 8px 0;
+      background-color: transparent;
+      border-left: 3px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .sidebar-item:hover {
+      background-color: var(--bg-tertiary);
+      border-left-color: var(--purple);
+    }
+
+    .sidebar-item.active {
+      background-color: var(--bg-tertiary);
+      border-left-color: var(--cyan);
+    }
+
+    .roadmap-title {
+      color: var(--text-primary);
+      font-weight: 500;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+
+    .roadmap-meta-small {
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .roadmap-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 40px;
+    }
+
+    .day-section {
+      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .day-header {
+      color: var(--cyan);
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .content-line {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.3s;
+    }
+
+    .stat-card:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 0 30px rgba(34, 211, 238, 0.2);
+      transform: translateY(-4px);
+    }
+
+    .stat-icon {
+      font-size: 2.5rem;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--cyan);
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .dashboard-header {
+      margin-bottom: 40px;
+    }
+
+    .dashboard-header h1 {
+      color: var(--cyan);
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+    }
+
+    .dashboard-header p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+
+    /* Progress Page */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .analytics-card {
+      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.3s;
+    }
+
+    .analytics-card:hover {
+      border-color: var(--purple);
+      box-shadow: 0 0 30px rgba(167, 139, 250, 0.2);
+      transform: translateY(-4px);
+    }
+
+    .card-icon {
+      font-size: 2.5rem;
+    }
+
+    .card-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--purple);
+      margin-bottom: 4px;
+    }
+
+    .card-label {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* Activity Chart */
+    .activity-section {
+      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .activity-section h2 {
+      color: var(--cyan);
+      margin-bottom: 24px;
+      font-size: 1.5rem;
+    }
+
+    .chart-container {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      height: 200px;
+      gap: 16px;
+      padding: 24px 0;
+    }
+
+    .chart-bar-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      max-width: 80px;
+      gap: 12px;
+    }
+
+    .chart-bar {
+      width: 100%;
+      max-width: 60px;
+      background: linear-gradient(180deg, var(--cyan), var(--purple));
+      border-radius: 6px 6px 0 0;
+      transition: all 0.3s;
+      cursor: pointer;
+      min-height: 20px;
+    }
+
+    .chart-bar:hover {
+      box-shadow: 0 0 20px rgba(34, 211, 238, 0.4);
+      transform: scaleY(1.05);
+    }
+
+    .chart-label {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .chart-value {
+      color: var(--cyan);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    /* Badges */
+    .achievements-section {
+      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .achievements-section h2 {
+      color: var(--purple);
+      margin-bottom: 24px;
+      font-size: 1.5rem;
+    }
+
+    .badges-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 20px;
+    }
+
+    .badge {
+      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: all 0.3s;
+      cursor: pointer;
+      min-height: 160px;
+      justify-content: center;
+      position: relative;
+    }
+
+    .badge:hover {
+      border-color: var(--purple);
+      transform: translateY(-8px);
+    }
+
+    .badge.unlocked {
+      border-color: var(--cyan);
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(167, 139, 250, 0.1));
+    }
+
+    .badge.unlocked:hover {
+      box-shadow: 0 0 30px rgba(34, 211, 238, 0.3);
+    }
+
+    .badge.locked {
+      opacity: 0.6;
+    }
+
+    .badge-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    .badge-name {
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    .badge.unlocked .badge-name {
+      color: var(--cyan);
+    }
+
+    .badge-lock {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 1.2rem;
+    }
+
+    /* Misc */
+    h2, h3 {
+      margin-bottom: 16px;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      transition: all 0.3s;
+      font-size: 1rem;
+    }
+
+    .btn-login {
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      color: #0a0f1e;
+      padding: 8px 16px;
+      font-weight: 700;
+    }
+
+    .btn-logout {
+      background: #ef4444;
+      color: white;
+      padding: 8px 16px;
+      font-weight: 600;
+    }
+
+    .user-name {
+      color: var(--text-secondary);
+    }
+
+    input, select {
+      padding: 12px;
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 1rem;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1);
+    }
+
+    .doubt-section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      padding: 24px;
+      border-radius: 12px;
+      margin-top: 40px;
+    }
+
+    .doubt-form {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .doubt-form input {
+      flex: 1;
+      padding: 12px 16px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+
+    .doubt-form input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .doubt-form button {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      color: #0a0f1e;
+      font-weight: 600;
+    }
+
+    .doubt-form button:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+
+    .doubt-form button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .doubt-answer {
+      background: var(--bg-primary);
+      border-left: 4px solid var(--cyan);
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .task-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      margin-top: 16px;
+      padding: 12px;
+      background: var(--bg-primary);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .task-checkbox input {
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--cyan);
+    }
+
+    .task-checkbox:hover {
+      background: var(--bg-tertiary);
+    }
+
+    @media (max-width: 768px) {
+      .roadmap-page {
+        grid-template-columns: 1fr;
+      }
+      .sidebar { display: none; }
+      .nav-tabs { gap: 16px; font-size: 0.9rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    @keyframes slideIn {
+      from { 
+        opacity: 0; 
+        transform: translateX(-20px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateX(0); 
+      }
+    }
+
+    .fade-in { animation: fadeIn 0.3s ease-out; }
+    .pulse { animation: pulse 1s ease-in-out infinite; }
+    .slide-in { animation: slideIn 0.5s ease-out; }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-family: Arial; color: #e4e4e7; background: #0a0f1e; flex-direction: column; gap: 20px;">
+      <div style="font-size: 48px;">⏳</div>
+      <h1>Loading PathAI...</h1>
+      <p style="color: #a1a1aa;">If this page looks stuck, open DevTools (F12) to check for errors</p>
+    </div>
+  </div>
+
+  <script type="text/babel">
+    console.log('✅ React App Starting...');
+    console.log('React:', typeof React);
+    console.log('ReactDOM:', typeof ReactDOM);
+    
+    const { useState, useEffect } = React;
+
+    function App() {
+      const [currentPage, setCurrentPage] = useState('dashboard');
+      const [user, setUser] = useState(null);
+      const [roadmaps, setRoadmaps] = useState([]);
+      const [showAuth, setShowAuth] = useState(false);
+      const [authMode, setAuthMode] = useState('login');
+      const [refreshTrigger, setRefreshTrigger] = useState(0);
+      const [selectedRoadmapId, setSelectedRoadmapId] = useState(null);
+      const BACKEND_URL = 'http://localhost:5000';
+
+      useEffect(() => {
+        const token = localStorage.getItem('authToken');
+        if (token) loadUserProfile(token);
+      }, []);
+
+      useEffect(() => {
+        if (user) {
+          const token = localStorage.getItem('authToken');
+          loadRoadmaps(token);
+        }
+      }, [user, refreshTrigger]);
+
+      const loadUserProfile = async (token) => {
+        try {
+          const res = await fetch(`${BACKEND_URL}/api/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const userData = await res.json();
+            setUser(userData);
+          } else {
+            localStorage.removeItem('authToken');
+          }
+        } catch (err) {
+          console.error('Profile load failed:', err);
+          localStorage.removeItem('authToken');
+        }
+      };
+
+      const loadRoadmaps = async (token) => {
+        try {
+          console.log('[App] Loading roadmaps...');
+          const res = await fetch(`${BACKEND_URL}/api/roadmap`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            console.log('[App] Roadmaps received from backend:', data);
+            setRoadmaps(data.roadmaps || []);
+            console.log('[App] State updated with', (data.roadmaps || []).length, 'roadmaps');
+          } else {
+            console.error('[App] Failed to fetch roadmaps. Status:', res.status);
+          }
+        } catch (err) {
+          console.error('[App] Roadmaps load failed:', err);
+        }
+      };
+
+      const refreshRoadmaps = () => {
+        setRefreshTrigger(t => t + 1);
+      };
+
+      return (
+        <div className="app">
+          <Navigation 
+            user={user} 
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+            onLogout={() => { 
+              setUser(null); 
+              setRoadmaps([]); 
+              localStorage.removeItem('authToken');
+              setCurrentPage('dashboard');
+            }}
+            onLoginClick={() => setShowAuth(true)}
+          />
+          <div className="main-content">
+            {!user ? (
+              <AuthForm 
+                mode={authMode}
+                onModeChange={setAuthMode}
+                onSuccess={(user, token) => {
+                  setUser(user);
+                  localStorage.setItem('authToken', token);
+                  setShowAuth(false);
+                  loadRoadmaps(token);
+                }}
+                backendUrl={BACKEND_URL}
+              />
+            ) : (
+              <>
+                {currentPage === 'dashboard' && <Dashboard user={user} roadmaps={roadmaps} onRefresh={refreshRoadmaps} onViewRoadmap={(roadmapId) => { setSelectedRoadmapId(roadmapId); setCurrentPage('roadmap'); }} onDeleteRoadmap={(roadmapId) => { const token = localStorage.getItem('authToken'); fetch(`${BACKEND_URL}/api/roadmap/${roadmapId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.ok && (setRoadmaps(roadmaps.filter(r => r.id !== roadmapId)), console.log('[Dashboard] Roadmap deleted'))) }} />}
+                {currentPage === 'roadmap' && <RoadmapPage roadmaps={roadmaps} onRefresh={refreshRoadmaps} initialRoadmapId={selectedRoadmapId} onPageChange={setCurrentPage} />}
+                {currentPage === 'progress' && <ProgressPage user={user} roadmaps={roadmaps} />}
+              </>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    function AuthForm({ mode, onModeChange, onSuccess, backendUrl }) {
+      const [email, setEmail] = useState('demo@pathai.com');
+      const [password, setPassword] = useState('demo123');
+      const [name, setName] = useState('');
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState('');
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        if (!email.trim() || !password.trim()) {
+          setError('Please enter email and password');
+          return;
+        }
+
+        if (mode === 'signup' && !name.trim()) {
+          setError('Please enter your name');
+          return;
+        }
+
+        setLoading(true);
+        try {
+          const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/signup';
+          const payload = mode === 'login' 
+            ? { email, password }
+            : { name, email, password };
+
+          const res = await fetch(`${backendUrl}${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!res.ok) {
+            const text = await res.text();
+            try {
+              const data = JSON.parse(text);
+              setError(data.message || data.error || 'Authentication failed');
+            } catch {
+              setError('Server error: ' + text.substring(0, 100));
+            }
+            return;
+          }
+
+          const data = await res.json();
+          onSuccess(data.user, data.token);
+        } catch (err) {
+          setError('Error: ' + err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      return (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: 'calc(100vh - 60px)',
+          background: 'linear-gradient(135deg, var(--bg-primary), var(--bg-secondary))',
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border)',
+            borderRadius: '16px',
+            padding: '40px',
+            maxWidth: '400px',
+            width: '100%'
+          }}>
+            <h1 style={{ color: 'var(--cyan)', marginBottom: '8px', textAlign: 'center' }}>🤖 PathAI</h1>
+            <p style={{ color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '32px' }}>
+              Your learning path generator
+            </p>
+
+            <form onSubmit={handleSubmit}>
+              {mode === 'signup' && (
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Name</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your name"
+                    disabled={loading}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+              )}
+
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email"
+                  disabled={loading}
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  disabled={loading}
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              {error && (
+                <div style={{ 
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid #ef4444',
+                  color: '#fca5a5',
+                  padding: '12px',
+                  borderRadius: '6px',
+                  marginBottom: '16px',
+                  fontSize: '0.9rem'
+                }}>
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: 'linear-gradient(135deg, var(--cyan), var(--purple))',
+                  color: '#0a0f1e',
+                  fontWeight: '700',
+                  borderRadius: '8px',
+                  border: 'none',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  opacity: loading ? 0.6 : 1,
+                  marginBottom: '16px'
+                }}
+              >
+                {loading ? '⏳ Loading...' : (mode === 'login' ? '🔓 Login' : '📝 Sign Up')}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onModeChange(mode === 'login' ? 'signup' : 'login')}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: 'transparent',
+                  color: 'var(--cyan)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '500'
+                }}
+              >
+                {mode === 'login' ? 'Need an account? Sign Up' : 'Have an account? Login'}
+              </button>
+            </form>
+
+            <div style={{
+              marginTop: '24px',
+              padding: '16px',
+              background: 'var(--bg-primary)',
+              borderRadius: '8px',
+              border: '1px solid var(--border)',
+              fontSize: '0.85rem',
+              color: 'var(--text-secondary)',
+              textAlign: 'center'
+            }}>
+              <strong>Demo Account:</strong><br/>
+              📧 demo@pathai.com<br/>
+              🔑 demo123
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function Navigation({ user, currentPage, onPageChange, onLogout, onLoginClick }) {
+      return (
+        <nav className="navbar">
+          <div className="nav-container">
+            <div className="nav-logo">🤖 PathAI</div>
+            <div className="nav-tabs">
+              <button 
+                className={`nav-tab ${currentPage === 'dashboard' ? 'active' : ''}`}
+                onClick={() => onPageChange('dashboard')}
+              >
+                📊 Dashboard
+              </button>
+              {user && (
+                <>
+                  <button 
+                    className={`nav-tab ${currentPage === 'roadmap' ? 'active' : ''}`}
+                    onClick={() => onPageChange('roadmap')}
+                  >
+                    🗺️ Roadmap
+                  </button>
+                  <button 
+                    className={`nav-tab ${currentPage === 'progress' ? 'active' : ''}`}
+                    onClick={() => onPageChange('progress')}
+                  >
+                    📈 Progress
+                  </button>
+                </>
+              )}
+            </div>
+            <div className="nav-user">
+              {user ? (
+                <>
+                  <span className="user-name">👤 {user.name}</span>
+                  <button className="btn-logout" onClick={() => {
+                    if (confirm('Are you sure you want to logout?')) onLogout();
+                  }}>🚪 Logout</button>
+                </>
+              ) : (
+                <button className="btn-login" onClick={onLoginClick}>🔐 Login</button>
+              )}
+            </div>
+          </div>
+        </nav>
+      );
+    }
+
+    function Dashboard({ user, roadmaps, onRefresh, onViewRoadmap, onDeleteRoadmap }) {
+      const [topic, setTopic] = React.useState('');
+      const [days, setDays] = React.useState('2');
+      const [loading, setLoading] = React.useState(false);
+      const BACKEND_URL = 'http://localhost:5000';
+
+      const handleGenerateRoadmap = async (e) => {
+        e.preventDefault();
+        if (!user) { alert('Please login first'); return; }
+        if (!topic.trim()) { alert('Please enter a topic'); return; }
+
+        setLoading(true);
+        try {
+          const token = localStorage.getItem('authToken');
+          const topicWithDays = `${topic} in ${days} days`;
+          console.log('[Frontend] Generating roadmap for:', topicWithDays);
+          
+          const res = await fetch(`${BACKEND_URL}/api/n8n/generate-roadmap`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ topic: topicWithDays })
+          });
+
+          const data = await res.json();
+          console.log('[Frontend] Generation response:', data);
+
+          if (!res.ok) {
+            alert('❌ Error: ' + (data.error || data.message || 'Failed to generate roadmap'));
+            return;
+          }
+
+          setTopic('');
+          alert('✅ Roadmap generated successfully! Refreshing...');
+          
+          // Immediate refresh + delayed refreshes with logging
+          console.log('[Frontend] Triggering refresh sequence...');
+          onRefresh();
+          console.log('[Frontend] Refresh 1 - immediate');
+          
+          setTimeout(() => {
+            console.log('[Frontend] Refresh 2 - 1000ms');
+            onRefresh();
+          }, 1000);
+          
+          setTimeout(() => {
+            console.log('[Frontend] Refresh 3 - 2000ms');
+            onRefresh();
+          }, 2000);
+        } catch (err) {
+          console.error('[Frontend] Generation error:', err);
+          alert('❌ Error: ' + err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const totalDays = roadmaps.reduce((sum, r) => sum + (r.days || 0), 0);
+      const totalXp = user?.xp || 0;
+
+      return (
+        <div className="fade-in">
+          <div className="dashboard-header">
+            <h1>🚀 Welcome back, {user?.name || 'Guest'}!</h1>
+            <p>Your learning journey starts here</p>
+          </div>
+
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="stat-icon">📖</div>
+              <div>
+                <div className="stat-value">{roadmaps.length}</div>
+                <div className="stat-label">Roadmaps Created</div>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">📅</div>
+              <div>
+                <div className="stat-value">{totalDays}</div>
+                <div className="stat-label">Total Learning Days</div>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">✅</div>
+              <div>
+                <div className="stat-value">{roadmaps.filter(r => r.status === 'completed').length}</div>
+                <div className="stat-label">Completed</div>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">⭐</div>
+              <div>
+                <div className="stat-value">{totalXp}</div>
+                <div className="stat-label">Total XP</div>
+              </div>
+            </div>
+          </div>
+
+          {user && (
+            <div style={{
+              background: 'linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary))',
+              border: '1px solid var(--border)',
+              borderRadius: '12px',
+              padding: '32px',
+              marginBottom: '40px'
+            }}>
+              <h2 style={{ color: 'var(--cyan)', marginBottom: '24px' }}>✨ Generate New Roadmap</h2>
+              <form onSubmit={handleGenerateRoadmap} style={{ display: 'grid', gridTemplateColumns: '1fr 150px 150px', gap: '16px', alignItems: 'end' }}>
+                <div>
+                  <input
+                    type="text"
+                    value={topic}
+                    onChange={(e) => setTopic(e.target.value)}
+                    placeholder="e.g., React for Beginners, Python Basics, Backend Automation..."
+                    disabled={loading}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+                <div>
+                  <select value={days} onChange={(e) => setDays(e.target.value)} disabled={loading} style={{ width: '100%' }}>
+                    <option value="1">1 Day</option>
+                    <option value="2">2 Days</option>
+                    <option value="3">3 Days</option>
+                    <option value="5">5 Days</option>
+                    <option value="7">7 Days</option>
+                  </select>
+                </div>
+                <button type="submit" disabled={loading} style={{
+                  padding: '12px 28px',
+                  background: 'linear-gradient(135deg, var(--cyan), var(--purple))',
+                  color: '#0a0f1e',
+                  fontWeight: '700',
+                  borderRadius: '8px',
+                  border: 'none',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  opacity: loading ? 0.6 : 1
+                }}>
+                  {loading ? '⏳ Generating...' : '🎯 Generate'}
+                </button>
+              </form>
+            </div>
+          )}
+
+          <h2 style={{ color: 'var(--cyan)', marginBottom: '20px' }}>📚 Recent Roadmaps</h2>
+          {roadmaps.length === 0 ? (
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(167, 139, 250, 0.1))',
+              border: '2px dashed var(--border)',
+              borderRadius: '12px',
+              padding: '40px',
+              textAlign: 'center',
+              color: 'var(--text-secondary)'
+            }}>
+              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🗺️</div>
+              <p style={{ fontSize: '1.1rem', marginBottom: '8px' }}>No roadmaps generated yet</p>
+              <small>Use the form above to generate your first roadmap</small>
+            </div>
+          ) : (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: '16px'
+            }}>
+              {roadmaps.slice(0, 8).map((r, idx) => (
+                <div key={r.id} style={{
+                  background: `linear-gradient(135deg, ${idx % 2 === 0 ? 'rgba(34, 211, 238, 0.15)' : 'rgba(167, 139, 250, 0.15)'}, var(--bg-secondary))`,
+                  border: '1px solid var(--border)',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = `0 0 20px ${idx % 2 === 0 ? 'rgba(34, 211, 238, 0.3)' : 'rgba(167, 139, 250, 0.3)'}`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'start',
+                    marginBottom: '12px'
+                  }}>
+                    <h3 style={{
+                      color: 'var(--text-primary)',
+                      fontSize: '1rem',
+                      fontWeight: '600',
+                      margin: 0,
+                      flex: 1
+                    }}>{r.topic}</h3>
+                    <span style={{
+                      background: idx % 2 === 0 ? 'rgba(34, 211, 238, 0.2)' : 'rgba(167, 139, 250, 0.2)',
+                      color: idx % 2 === 0 ? 'var(--cyan)' : 'var(--purple)',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      fontSize: '0.75rem',
+                      fontWeight: '600',
+                      whiteSpace: 'nowrap'
+                    }}>{r.days} Days</span>
+                  </div>
+
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginBottom: '12px',
+                    fontSize: '0.85rem',
+                    color: 'var(--text-secondary)'
+                  }}>
+                    <span>📊 {Math.round(r.progress || 0)}% Complete</span>
+                    <span style={{
+                      color: r.status === 'completed' ? 'var(--green)' : 'var(--cyan)',
+                      fontWeight: '500'
+                    }}>
+                      {r.status === 'completed' ? '✅ Done' : '🔄 Active'}
+                    </span>
+                  </div>
+
+                  <div style={{
+                    background: 'var(--bg-primary)',
+                    height: '6px',
+                    borderRadius: '3px',
+                    overflow: 'hidden',
+                    marginBottom: '12px'
+                  }}>
+                    <div style={{
+                      height: '100%',
+                      background: `linear-gradient(90deg, ${idx % 2 === 0 ? 'var(--cyan)' : 'var(--purple)'}, ${idx % 2 === 0 ? 'var(--purple)' : 'var(--cyan)'})`,
+                      width: `${r.progress || 0}%`,
+                      transition: 'width 0.3s'
+                    }}></div>
+                  </div>
+
+                  <div style={{
+                    display: 'flex',
+                    gap: '8px'
+                  }}>
+                    <button style={{
+                      flex: 1,
+                      padding: '8px',
+                      background: `linear-gradient(135deg, ${idx % 2 === 0 ? 'var(--cyan)' : 'var(--purple)'}, ${idx % 2 === 0 ? 'var(--purple)' : 'var(--cyan)'})`,
+                      color: '#0a0f1e',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      fontSize: '0.85rem',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                    onClick={() => {
+                      console.log('[Dashboard] Viewing roadmap:', r.topic);
+                      onViewRoadmap(r.id);
+                    }}>
+                      📖 View
+                    </button>
+                    <button style={{
+                      padding: '8px 12px',
+                      background: 'rgba(239, 68, 68, 0.1)',
+                      color: '#ef4444',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontWeight: '500',
+                      fontSize: '0.85rem',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
+                      e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                      e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                    }}
+                    onClick={() => {
+                      if (confirm('Delete this roadmap? This cannot be undone.')) {
+                        console.log('[Dashboard] Deleting roadmap:', r.id);
+                        onDeleteRoadmap(r.id);
+                      }
+                    }}>
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function RoadmapPage({ roadmaps, onRefresh, initialRoadmapId, onPageChange }) {
+      const [selectedRoadmap, setSelectedRoadmap] = React.useState(() => {
+        if (initialRoadmapId) {
+          const found = roadmaps.find(r => r.id === initialRoadmapId);
+          if (found) return found;
+        }
+        return roadmaps[0] || null;
+      });
+      const [roadmapContent, setRoadmapContent] = React.useState(null);
+      const [progress, setProgress] = React.useState({});
+      const [doubt, setDoubt] = React.useState('');
+      const [doubtAnswer, setDoubtAnswer] = React.useState('');
+      const [loadingDoubt, setLoadingDoubt] = React.useState(false);
+      const [viewMode, setViewMode] = React.useState('text'); // 'text', 'mindmap', 'flowchart'
+      const [mermaidDiagram, setMermaidDiagram] = React.useState('');
+      
+      // Quiz System State
+      const [showQuiz, setShowQuiz] = React.useState(false);
+      const [currentDayQuiz, setCurrentDayQuiz] = React.useState(null);
+      const [quizQuestions, setQuizQuestions] = React.useState([]);
+      const [currentQuestionIdx, setCurrentQuestionIdx] = React.useState(0);
+      const [userAnswers, setUserAnswers] = React.useState([]);
+      const [quizScore, setQuizScore] = React.useState(null);
+      const [quizResults, setQuizResults] = React.useState({});
+      const [badges, setBadges] = React.useState({});
+      const [topicAccuracy, setTopicAccuracy] = React.useState({});
+      const [loadingQuiz, setLoadingQuiz] = React.useState(false);
+      
+      const POE_API_KEY = 'sk-poe-3JANPSJ5fTYxglbWjjSW6bXiotS08ch0QhRY7G9u8MQ';
+      const BACKEND_URL = 'http://localhost:5000';
+
+      React.useEffect(() => {
+        if (roadmaps.length > 0 && !selectedRoadmap) {
+          setSelectedRoadmap(roadmaps[0]);
+        }
+      }, [roadmaps]);
+
+      React.useEffect(() => {
+        if (selectedRoadmap && selectedRoadmap.content) {
+          console.log('[RoadmapPage] Setting roadmapContent from selectedRoadmap:', selectedRoadmap.topic);
+          localStorage.setItem('currentRoadmapId', selectedRoadmap.id);
+          setRoadmapContent(selectedRoadmap.content);
+          const savedProgress = localStorage.getItem(`roadmap_progress_${selectedRoadmap.id}`);
+          setProgress(savedProgress ? JSON.parse(savedProgress) : {});
+          
+          // Load quiz results and badges
+          const savedQuizResults = localStorage.getItem(`quiz_results_${selectedRoadmap.id}`);
+          const savedBadges = localStorage.getItem(`quiz_badges_${selectedRoadmap.id}`);
+          if (savedQuizResults) setQuizResults(JSON.parse(savedQuizResults));
+          if (savedBadges) setBadges(JSON.parse(savedBadges));
+          
+          // Load the first day's topic accuracy for display
+          // (For multi-day roadmaps, we can load specific day's data on demand)
+          const firstDayTopicAccuracy = localStorage.getItem(`topic_accuracy_${selectedRoadmap.id}_day1`);
+          if (firstDayTopicAccuracy) setTopicAccuracy(JSON.parse(firstDayTopicAccuracy));
+        }
+      }, [selectedRoadmap]);
+
+      const handleCheckTask = (index) => {
+        const key = `day_${index}`;
+        const updated = { ...progress, [key]: !progress[key] };
+        setProgress(updated);
+        
+        if (selectedRoadmap) {
+          localStorage.setItem(`roadmap_progress_${selectedRoadmap.id}`, JSON.stringify(updated));
+          
+          // Calculate progress percentage
+          const totalDays = selectedRoadmap.days || 3;
+          const checkedDays = Object.values(updated).filter(Boolean).length;
+          const progressPercentage = Math.round((checkedDays / totalDays) * 100);
+          
+          // Update backend with progress
+          const token = localStorage.getItem('authToken');
+          fetch(`${BACKEND_URL}/api/roadmap/${selectedRoadmap.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              progress: progressPercentage,
+              status: progressPercentage === 100 ? 'completed' : 'active'
+            })
+          }).then(r => {
+            if (r.ok) {
+              console.log('[RoadmapPage] Progress updated:', progressPercentage + '%');
+              onRefresh();
+            }
+          }).catch(err => console.error('[RoadmapPage] Progress update failed:', err));
+        }
+      };
+
+      const handleDeleteRoadmap = async () => {
+        if (!confirm('Delete this roadmap? This cannot be undone.')) return;
+        try {
+          const token = localStorage.getItem('authToken');
+          const res = await fetch(`${BACKEND_URL}/api/roadmap/${selectedRoadmap.id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            alert('✅ Roadmap deleted');
+            onRefresh();
+            setSelectedRoadmap(roadmaps[0] || null);
+          }
+        } catch (err) {
+          alert('Error: ' + err.message);
+        }
+      };
+
+      const handleAskDoubt = async (e) => {
+        e.preventDefault();
+        if (!doubt.trim()) return;
+        setLoadingDoubt(true);
+        try {
+          const token = localStorage.getItem('authToken');
+          const res = await fetch(`${BACKEND_URL}/api/n8n/doubt-solver`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ question: doubt })
+          });
+          const data = await res.json();
+          setDoubtAnswer(data.answer || 'Could not get answer');
+          setDoubt('');
+        } catch (err) {
+          setDoubtAnswer('Error: ' + err.message);
+        } finally {
+          setLoadingDoubt(false);
+        }
+      };
+
+      // Parse and render content lines with special handling for links
+      const renderContentLine = (line, index) => {
+        if (!line.trim()) return null;
+        
+        // Check for VIDEO link
+        if (line.includes('VIDEO:') || line.includes('📺')) {
+          const urlMatch = line.match(/https?:\/\/[^\s]+/);
+          if (urlMatch) {
+            const url = urlMatch[0];
+            return (
+              <a key={index} href={url} target="_blank" rel="noopener noreferrer" style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 16px',
+                background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(234, 179, 8, 0.1))',
+                border: '1px solid rgba(239, 68, 68, 0.4)',
+                borderRadius: '8px',
+                color: '#ef4444',
+                textDecoration: 'none',
+                fontWeight: '600',
+                fontSize: '0.9rem',
+                marginBottom: '12px',
+                transition: 'all 0.3s',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(234, 179, 8, 0.2))';
+                e.currentTarget.style.transform = 'translateX(4px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(234, 179, 8, 0.1))';
+                e.currentTarget.style.transform = 'translateX(0)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}>
+                📺 Watch Video
+              </a>
+            );
+          }
+        }
+        
+        // Check for ARTICLE link
+        if (line.includes('ARTICLE:') || line.includes('📄')) {
+          const urlMatch = line.match(/https?:\/\/[^\s]+/);
+          if (urlMatch) {
+            const url = urlMatch[0];
+            return (
+              <a key={index} href={url} target="_blank" rel="noopener noreferrer" style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 16px',
+                background: 'linear-gradient(135deg, rgba(34, 211, 238, 0.2), rgba(59, 130, 246, 0.1))',
+                border: '1px solid rgba(34, 211, 238, 0.4)',
+                borderRadius: '8px',
+                color: '#22d3ee',
+                textDecoration: 'none',
+                fontWeight: '600',
+                fontSize: '0.9rem',
+                marginBottom: '12px',
+                transition: 'all 0.3s',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(34, 211, 238, 0.3), rgba(59, 130, 246, 0.2))';
+                e.currentTarget.style.transform = 'translateX(4px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(34, 211, 238, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(34, 211, 238, 0.2), rgba(59, 130, 246, 0.1))';
+                e.currentTarget.style.transform = 'translateX(0)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}>
+                📖 Read Article
+              </a>
+            );
+          }
+        }
+        
+        // Regular content line
+        return (
+          <div key={index} className="content-line" style={{
+            color: 'var(--text-secondary)',
+            lineHeight: '1.7',
+            marginBottom: '8px',
+            paddingLeft: '12px',
+            borderLeft: '2px solid var(--border)'
+          }}>
+            {line.startsWith('-') || line.startsWith('•') ? line : '• ' + line}
+          </div>
+        );
+      };
+
+      // QUIZ SYSTEM - Professional Day-Specific Questions via Poe API
+      const generateQuizQuestions = async (dayNumber) => {
+        setLoadingQuiz(true);
+        try {
+          console.log('[Quiz] Creating quiz for Day', dayNumber);
+          console.log('[Quiz] Content length:', roadmapContent?.length);
+          
+          // Simple and robust extraction
+          const allContent = roadmapContent || '';
+          const dayRegex = new RegExp(`day\\s+${dayNumber}([\\s\\S]*?)(?=day\\s+${dayNumber + 1}|$)`, 'i');
+          const match = allContent.match(dayRegex);
+          
+          let dayContent = '';
+          if (match) {
+            dayContent = match[1];
+          } else {
+            // Fallback: just use a portion of content
+            const parts = allContent.split(/day\s+\d+/i);
+            dayContent = parts[dayNumber] || allContent.substring(0, 500);
+          }
+          
+          console.log('[Quiz] Day Content Length:', dayContent.length);
+          
+          // Extract topics more robustly
+          let topics = [];
+          const lines = dayContent.split('\n');
+          
+          for (let line of lines) {
+            const trimmed = line.trim();
+            // Look for lines that look like topics
+            if (trimmed.length > 10 && !trimmed.startsWith('🚀') && !trimmed.startsWith('===')) {
+              if (trimmed.match(/^[-•✓*]/)) {
+                const topic = trimmed.replace(/^[-•✓*]\s*/, '').split('\n')[0].trim();
+                if (topic.length > 5 && topic.length < 100 && topics.length < 5) {
+                  topics.push(topic);
+                }
+              }
+            }
+          }
+          
+          // If still no topics, create generic ones
+          if (topics.length === 0) {
+            topics = [
+              `Fundamentals of Day ${dayNumber}`,
+              `Core Concepts`,
+              `Practical Applications`,
+              `Best Practices`
+            ];
+          }
+          
+          console.log('[Quiz] Topics found:', topics.slice(0, 3));
+          
+          const topicsStr = topics.slice(0, 4).join(', ');
+          const prompt = `Generate 4 professional multiple-choice questions for Day ${dayNumber} about: ${topicsStr}
+
+Format EXACTLY:
+Q1: Question?|||Option A|||Option B - CORRECT|||Option C|||Option D
+Q2: Question?|||Option A - CORRECT|||Option B|||Option C|||Option D
+Q3: Question?|||Option A|||Option B|||Option C - CORRECT|||Option D
+Q4: Question?|||Option A|||Option B|||Option C|||Option D - CORRECT`;
+
+          console.log('[Quiz] Calling Poe API...');
+          
+          const response = await fetch('https://api.poe.com/api/query', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${POE_API_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              query: prompt,
+              model: 'gpt-4'
+            })
+          }).catch(e => {
+            console.log('[Quiz] API error, using fallback:', e.message);
+            return null;
+          });
+
+          let questions = [];
+          
+          if (response?.ok) {
+            try {
+              const data = await response.json();
+              const text = data.result || data.message || data.output || '';
+              console.log('[Quiz] Response length:', text.length);
+              
+              const qLines = text.split('\n').filter(l => l.match(/^Q\d/i) && l.includes('|||'));
+              
+              for (let line of qLines.slice(0, 4)) {
+                const cleaned = line.replace(/^Q\d+:\s*/i, '');
+                const parts = cleaned.split('|||').map(p => p.trim());
+                
+                if (parts.length >= 5) {
+                  let correctIdx = -1;
+                  const options = [];
+                  
+                  for (let i = 1; i <= 4; i++) {
+                    const opt = parts[i].replace(' - CORRECT', '').replace('(CORRECT)', '').trim();
+                    if (opt.length > 3) {
+                      if (parts[i].includes('CORRECT')) correctIdx = options.length;
+                      options.push(opt);
+                    }
+                  }
+                  
+                  if (correctIdx >= 0 && options.length === 4) {
+                    questions.push({
+                      id: questions.length,
+                      question: parts[0],
+                      options,
+                      correct: correctIdx
+                    });
+                  }
+                }
+              }
+            } catch (e) {
+              console.log('[Quiz] Parse failed:', e.message);
+            }
+          }
+          
+          // Professional Fallback
+          if (questions.length === 0) {
+            console.log('[Quiz] Using professional fallback');
+            
+            const fallbackQ = {
+              1: [
+                { q: `What is the main purpose of ${topics[0]}?`, opts: ['To display data', 'To store and manage data', 'To create errors', 'To slow down'], c: 1 },
+                { q: `Which of the following best describes ${topics[1] || 'a key concept'}?`, opts: ['It is rarely used', 'It is fundamental and widely used', 'It only works in specific scenarios', 'It should be avoided'], c: 1 },
+                { q: `How would you apply ${topics[0]} in real-world programming?`, opts: ['Rarely', 'In almost every program', 'Only for complex tasks', 'Never effectively'], c: 1 },
+                { q: `What is the correct way to use ${topics[2] || 'this technique'}?`, opts: ['With no precautions', 'Following best practices and conventions', 'Randomly without pattern', 'It does not matter'], c: 1 }
+              ],
+              2: [
+                { q: `When would you use ${topics[0]}?`, opts: ['Never', 'To control program flow', 'For display only', 'To declare variables'], c: 1 },
+                { q: `What is the difference between ${topics[0]} and ${topics[1]}?`, opts: ['No difference', 'Different use cases and execution patterns', 'Same thing different name', 'One is faster'], c: 1 },
+                { q: `How do you iterate through multiple values efficiently?`, opts: ['Not possible', 'Using loops and iteration techniques', 'With individual statements', 'It cannot be done'], c: 1 },
+                { q: `What is best practice for ${topics[2] || 'this pattern'}?`, opts: ['Ignore it', 'Use it correctly with proper validation', 'Avoid it completely', 'Use it without thinking'], c: 1 }
+              ],
+              3: [
+                { q: `Why use ${topics[0]} instead of inline code?`, opts: ['No reason', 'For code reusability and organization', 'To make it harder', 'It runs slower'], c: 1 },
+                { q: `What do ${topics[1] || 'parameters'} allow you to do?`, opts: ['Nothing', 'Pass data into functions', 'Speed up execution', 'Reduce memory'], c: 1 },
+                { q: `What is the advantage of ${topics[2] || 'this approach'}?`, opts: ['No clear advantage', 'Cleaner, more maintainable code', 'Slower execution', 'More complex logic'], c: 1 },
+                { q: `How should you handle errors in ${topics[0]}?`, opts: ['Ignore them', 'Use proper error handling mechanisms', 'Let them crash', 'Hide them from users'], c: 1 }
+              ]
+            };
+            
+            const qs = fallbackQ[dayNumber] || fallbackQ[1];
+            questions = (qs || []).map((item, idx) => ({
+              id: idx,
+              question: item.q,
+              options: item.opts,
+              correct: item.c
+            }));
+          }
+          
+          setQuizQuestions(questions);
+          setCurrentQuestionIdx(0);
+          setUserAnswers(new Array(questions.length).fill(-1));
+          setQuizScore(null);
+          setCurrentDayQuiz(dayNumber);
+          setShowQuiz(true);
+          
+          console.log('[Quiz] ✓ Ready! Day', dayNumber, 'Questions:', questions.length);
+        } catch (error) {
+          console.error('[Quiz] Error:', error.message);
+          setShowQuiz(false);
+        }
+        setLoadingQuiz(false);
+      };
+
+      const handleQuizAnswer = (optionIdx) => {
+        const updatedAnswers = [...userAnswers];
+        updatedAnswers[currentQuestionIdx] = optionIdx;
+        setUserAnswers(updatedAnswers);
+      };
+
+      const handleSubmitQuiz = async () => {
+        // Calculate score
+        let correctCount = 0;
+        const topicScores = {};
+        
+        quizQuestions.forEach((q, idx) => {
+          const isCorrect = userAnswers[idx] === q.correct;
+          if (isCorrect) correctCount++;
+          
+          // Extract topic from question
+          const topicMatch = q.question.match(/\[([^\]]+)\]/);
+          const topic = topicMatch ? topicMatch[1] : 'Other';
+          
+          if (!topicScores[topic]) {
+            topicScores[topic] = { correct: 0, total: 0 };
+          }
+          topicScores[topic].total++;
+          if (isCorrect) topicScores[topic].correct++;
+        });
+        
+        // Calculate percentages and identify weak topics
+        const topicAccuracyData = {};
+        let weakTopics = [];
+        
+        Object.entries(topicScores).forEach(([topic, scores]) => {
+          const accuracy = Math.round((scores.correct / scores.total) * 100);
+          topicAccuracyData[topic] = accuracy;
+          if (accuracy < 60) {
+            weakTopics.push({ topic, accuracy });
+          }
+        });
+        
+        const scorePercentage = Math.round((correctCount / quizQuestions.length) * 100);
+        setQuizScore(scorePercentage);
+        setTopicAccuracy(topicAccuracyData);
+        
+        // Determine badge
+        let badge = '';
+        if (scorePercentage === 100) badge = '🏆 PERFECT! 100%';
+        else if (scorePercentage >= 80) badge = '🥇 EXCELLENT! ' + scorePercentage + '%';
+        else if (scorePercentage >= 60) badge = '🥈 GOOD! ' + scorePercentage + '%';
+        else if (scorePercentage >= 40) badge = '🥉 FAIR! ' + scorePercentage + '%';
+        else badge = '📚 KEEP LEARNING! ' + scorePercentage + '%';
+        
+        // Save results
+        const results = { ...quizResults, [currentDayQuiz]: scorePercentage };
+        setQuizResults(results);
+        
+        const newBadges = { ...badges, [currentDayQuiz]: badge };
+        setBadges(newBadges);
+        
+        localStorage.setItem(`quiz_results_${selectedRoadmap.id}`, JSON.stringify(results));
+        localStorage.setItem(`quiz_badges_${selectedRoadmap.id}`, JSON.stringify(newBadges));
+        localStorage.setItem(`topic_accuracy_${selectedRoadmap.id}_day${currentDayQuiz}`, JSON.stringify(topicAccuracyData));
+        
+        console.log('[Quiz] Score:', scorePercentage + '%', 'Badge:', badge);
+        console.log('[Quiz] Topic Accuracy:', topicAccuracyData);
+        console.log('[Quiz] Weak Topics:', weakTopics);
+      };
+
+      const handleCloseQuiz = () => {
+        setShowQuiz(false);
+        setCurrentQuestionIdx(0);
+        setQuizQuestions([]);
+        setQuizScore(null);
+        setUserAnswers([]);
+        setTopicAccuracy({});
+      };
+
+      // Generate BEAUTIFUL Card-Based MindMap (Like Reference Image)
+      const generateMindMap = () => {
+        if (!selectedRoadmap) return '';
+        
+        console.log('[Diagram] Generating beautiful card-based MindMap');
+        const days = selectedRoadmap.days || 3;
+        const progress_pct = Math.round(selectedRoadmap.progress || 0);
+        
+        // Extract topics smartly
+        const content = selectedRoadmap.content;
+        const lines = content.split('\n').map(l => l.trim()).filter(l => l);
+        
+        const dayTopics = {};
+        let currentDay = 0;
+        
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          if (line.includes('DAY') && !dayTopics[`day${currentDay + 1}`]) {
+            currentDay++;
+            dayTopics[`day${currentDay}`] = [];
+          }
+          if ((line.startsWith('-') || line.startsWith('•')) && currentDay > 0) {
+            const topic = line.replace(/^[-•]\s*/, '').trim();
+            if (topic.length > 3 && !topic.includes('SYLLABUS') && dayTopics[`day${currentDay}`].length < 3) {
+              dayTopics[`day${currentDay}`].push(topic.substring(0, 40));
+            }
+          }
+        }
+        
+        // HTML for beautiful card layout
+        let html = `
+        <div style="width: 100%; padding: 40px 20px; background: linear-gradient(135deg, #0a0f1e 0%, #1a1f3a 100%); border-radius: 12px; position: relative;">
+          <!-- SVG for connecting glowing lines -->
+          <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;" id="mindmapSvg"></svg>
+          
+          <!-- Central Hub -->
+          <div style="text-align: center; margin-bottom: 60px; position: relative; z-index: 10;">
+            <div style="display: inline-block; background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%); border: 3px solid #0891b2; border-radius: 20px; padding: 30px 50px; box-shadow: 0 0 40px rgba(34, 211, 238, 0.6), inset 0 0 20px rgba(255,255,255,0.1);">
+              <div style="font-size: 28px; font-weight: bold; color: #000; margin-bottom: 10px;">🚀 ${selectedRoadmap.topic}</div>
+              <div style="font-size: 16px; color: #000; font-weight: 600;">IN ${days} DAYS: ACCELERATED</div>
+              <div style="font-size: 14px; color: #000; margin-top: 8px;">Progress: <span style="background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 4px;">${progress_pct}%</span></div>
+            </div>
+          </div>
+          
+          <!-- Left and Right Day Sections -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; position: relative; z-index: 5;">
+            <!-- LEFT SIDE (Day 1, 3, 5...) -->
+            <div style="text-align: right;">
+        `;
+        
+        // Add odd days (left side)
+        for (let d = 1; d <= days; d += 2) {
+          const dayId = `day_${d}`;
+          const isCompleted = progress[`day_${d-1}`];
+          const dayColor = isCompleted ? '#10b981' : '#a78bfa';
+          const dayBgGradient = isCompleted ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #a78bfa 0%, #9333ea 100%)';
+          const dayStatus = isCompleted ? 'COMPLETED' : 'ACTIVE';
+          const statusBadgeColor = isCompleted ? '#10b981' : '#f97316';
+          const topics = dayTopics[`day${d}`] || ['Learn Basics', 'Practice'];
+          
+          html += `
+            <div style="margin-bottom: 30px;">
+              <div style="background: ${dayBgGradient}; border-radius: 16px; padding: 20px; border: 2px solid ${dayColor}; box-shadow: 0 0 30px rgba(${isCompleted ? '16, 185, 129' : '167, 139, 250'}, 0.4); margin-bottom: 15px;" id="${dayId}">
+                <div style="font-size: 20px; font-weight: bold; color: #fff; margin-bottom: 10px;">📅 DAY ${d}: ${dayStatus}</div>
+                ${topics.map((topic, idx) => `
+                  <div style="background: rgba(255,255,255,0.15); padding: 10px; border-radius: 8px; margin-bottom: 8px; color: #fff; font-size: 13px; display: flex; align-items: center;">
+                    <span style="margin-right: 8px;">${idx === 0 ? '📖' : '🛠️'}</span>
+                    <span>${topic}</span>
+                  </div>
+                `).join('')}
+                <div style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 6px; margin-top: 10px; color: #fff; font-size: 12px; font-weight: 600;">
+                  <span style="background: ${statusBadgeColor}; padding: 4px 12px; border-radius: 12px; display: inline-block;">${dayStatus}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        
+        html += `
+            </div>
+            
+            <!-- RIGHT SIDE (Day 2, 4, 6...) -->
+            <div>
+        `;
+        
+        // Add even days (right side)
+        for (let d = 2; d <= days; d += 2) {
+          const dayId = `day_${d}`;
+          const isCompleted = progress[`day_${d-1}`];
+          const dayColor = isCompleted ? '#10b981' : '#ec4899';
+          const dayBgGradient = isCompleted ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)';
+          const dayStatus = isCompleted ? 'COMPLETED' : 'IN PROGRESS';
+          const statusBadgeColor = isCompleted ? '#10b981' : '#f97316';
+          const topics = dayTopics[`day${d}`] || ['Learn Basics', 'Practice'];
+          
+          html += `
+            <div style="margin-bottom: 30px;">
+              <div style="background: ${dayBgGradient}; border-radius: 16px; padding: 20px; border: 2px solid ${dayColor}; box-shadow: 0 0 30px rgba(${isCompleted ? '16, 185, 129' : '236, 72, 153'}, 0.4);" id="${dayId}">
+                <div style="font-size: 20px; font-weight: bold; color: #fff; margin-bottom: 10px;">⏳ DAY ${d}: ${dayStatus}</div>
+                ${topics.map((topic, idx) => `
+                  <div style="background: rgba(255,255,255,0.15); padding: 10px; border-radius: 8px; margin-bottom: 8px; color: #fff; font-size: 13px; display: flex; align-items: center;">
+                    <span style="margin-right: 8px;">${idx === 0 ? '📖' : '🛠️'}</span>
+                    <span>${topic}</span>
+                  </div>
+                `).join('')}
+                <div style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 6px; margin-top: 10px; color: #fff; font-size: 12px; font-weight: 600;">
+                  <span style="background: ${statusBadgeColor}; padding: 4px 12px; border-radius: 12px; display: inline-block;">${dayStatus}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        
+        html += `
+            </div>
+          </div>
+          
+          <!-- Completion Message -->
+          <div style="text-align: center; margin-top: 60px; padding: 20px; background: rgba(16, 185, 129, 0.1); border: 2px solid #10b981; border-radius: 12px;">
+            <div style="font-size: 18px; font-weight: bold; color: #10b981;">
+              ${progress_pct === 100 ? '🏅 PATHWAY COMPLETE - Ready for Advanced!' : '📚 Keep Learning - You are ' + progress_pct + '% done!'}
+            </div>
+          </div>
+        </div>
+        `;
+        
+        console.log('[Diagram] Beautiful MindMap HTML generated');
+        setMermaidDiagram(html);
+        return html;
+      };
+
+      // Generate Flowchart diagram - IMPROVED VERSION
+      const generateFlowchart = () => {
+        if (!selectedRoadmap) return '';
+        
+        console.log('[Diagram] Generating beautiful sequential flowchart');
+        const days = selectedRoadmap.days || 3;
+        const progress_pct = Math.round(selectedRoadmap.progress || 0);
+        
+        let html = `
+        <div style="width: 100%; padding: 40px 20px; background: linear-gradient(135deg, #0a0f1e 0%, #1a1f3a 100%); border-radius: 12px;">
+          
+          <!-- START NODE -->
+          <div style="text-align: center; margin-bottom: 30px;">
+            <div style="display: inline-block; background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%); border: 3px solid #0891b2; border-radius: 20px; padding: 25px 40px; box-shadow: 0 0 40px rgba(34, 211, 238, 0.6);">
+              <div style="font-size: 24px; font-weight: bold; color: #000;">🚀 START YOUR JOURNEY</div>
+              <div style="font-size: 14px; color: #000; margin-top: 8px; font-weight: 600;">${selectedRoadmap.topic}</div>
+            </div>
+          </div>
+          
+          <!-- ARROW DOWN -->
+          <div style="text-align: center; margin-bottom: 20px; font-size: 24px; color: #22d3ee;">⬇️</div>
+          
+          <!-- DAY CARDS - SEQUENTIAL -->
+          <div style="max-width: 500px; margin: 0 auto;">
+        `;
+        
+        for (let d = 1; d <= days; d++) {
+          const isCompleted = progress[`day_${d-1}`];
+          const isActive = !isCompleted;
+          
+          // Determine colors based on progress
+          let dayCardColor = '#a78bfa';
+          let dayCardGradient = 'linear-gradient(135deg, #a78bfa 0%, #9333ea 100%)';
+          let taskCardColor = '#ec4899';
+          let taskCardGradient = 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)';
+          
+          if (isCompleted) {
+            dayCardColor = '#10b981';
+            dayCardGradient = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            taskCardColor = '#10b981';
+            taskCardGradient = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+          }
+          
+          const dayStatus = isCompleted ? '✅ COMPLETED' : '⏳ IN PROGRESS';
+          const dayIcon = isCompleted ? '🎓' : '📚';
+          
+          // DAY CARD
+          html += `
+            <div style="margin-bottom: 20px;">
+              <div style="background: ${dayCardGradient}; border-radius: 16px; padding: 20px; border: 2px solid ${dayCardColor}; box-shadow: 0 0 25px rgba(${isCompleted ? '16, 185, 129' : '167, 139, 250'}, 0.4);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                  <div style="font-size: 22px; font-weight: bold; color: #fff;">${dayIcon} DAY ${d}: LEARNING PHASE</div>
+                  <span style="background: ${isCompleted ? '#10b981' : '#f97316'}; color: #fff; padding: 6px 14px; border-radius: 12px; font-size: 11px; font-weight: bold;">${dayStatus}</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 12px; border-radius: 8px; color: #fff; font-size: 13px;">
+                  📖 Learn concepts • 🛠️ Practice exercises • 📝 Complete assessments
+                </div>
+              </div>
+            </div>
+          `;
+          
+          // ARROW TO QUIZ
+          html += `<div style="text-align: center; color: ${dayCardColor}; margin: 10px 0; font-size: 18px;">⬇️</div>`;
+          
+          // QUIZ CARD
+          html += `
+            <div style="margin-bottom: ${d === days ? 20 : 20}px;">
+              <div style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); border-radius: 16px; padding: 18px; border: 2px solid #f59e0b; box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <div style="font-size: 18px; font-weight: bold; color: #000;">📝 Day ${d} Quiz & Validation</div>
+                  <span style="background: rgba(0,0,0,0.2); color: #000; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold;">Assess Progress</span>
+                </div>
+              </div>
+            </div>
+          `;
+          
+          // ARROW TO NEXT DAY (if not last day)
+          if (d < days) {
+            html += `
+              <div style="text-align: center; color: #22d3ee; margin: 20px 0; font-size: 20px; font-weight: bold;">
+                ⬇️ NEXT DAY
+              </div>
+            `;
+          }
+        }
+        
+        // COMPLETION MESSAGE
+        html += `
+            <div style="text-align: center; margin-top: 30px;">
+              <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 16px; padding: 25px; border: 3px solid #10b981; box-shadow: 0 0 40px rgba(16, 185, 129, 0.5);">
+                <div style="font-size: 28px; margin-bottom: 10px;">🏅</div>
+                <div style="font-size: 20px; font-weight: bold; color: #fff; margin-bottom: 8px;">PATHWAY COMPLETE!</div>
+                <div style="font-size: 14px; color: #fff; font-weight: 500;">
+                  ${progress_pct === 100 ? 'You have successfully completed the entire learning journey! Ready for the next challenge?' : `You are ${progress_pct}% of the way there. Keep pushing!`}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        `;
+        
+        console.log('[Diagram] Beautiful Flowchart HTML generated');
+        setMermaidDiagram(html);
+        return html;
+      };
+
+      // Render Mermaid diagram
+      React.useEffect(() => {
+        console.log('[Diagram] ViewMode changed to:', viewMode);
+        if (viewMode === 'mindmap') {
+          console.log('[Diagram] Generating MindMap...');
+          generateMindMap();
+        } else if (viewMode === 'flowchart') {
+          console.log('[Diagram] Generating Flowchart...');
+          generateFlowchart();
+        }
+      }, [viewMode, selectedRoadmap]);
+
+      // Initialize Mermaid
+      React.useEffect(() => {
+        if (mermaidDiagram && (viewMode === 'mindmap' || viewMode === 'flowchart')) {
+          console.log('[Mermaid] Initializing with diagram:', mermaidDiagram.substring(0, 50));
+          try {
+            if (typeof mermaid !== 'undefined') {
+              mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel: 'loose' });
+              mermaid.contentLoaded();
+              console.log('[Mermaid] Content loaded successfully');
+            } else {
+              console.warn('[Mermaid] Mermaid library not loaded yet');
+            }
+          } catch (err) {
+            console.error('[Mermaid] Error initializing:', err);
+          }
+        }
+      }, [mermaidDiagram, viewMode]);
+
+      return (
+        <div className="roadmap-page">
+          <div className="sidebar">
+            <div className="sidebar-header">📚 Your Roadmaps</div>
+            <div className="sidebar-list">
+              {roadmaps.length === 0 ? (
+                <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                  <p>No roadmaps yet</p>
+                  <small>Generate one from Dashboard</small>
+                </div>
+              ) : (
+                roadmaps.map(r => {
+                  const status = r.progress === 100 ? '🟢' : r.progress > 0 ? '🟣' : '⚪';
+                  return (
+                    <div
+                      key={r.id}
+                      className={`sidebar-item ${selectedRoadmap?.id === r.id ? 'active' : ''}`}
+                      onClick={() => setSelectedRoadmap(r)}
+                    >
+                      <div className="roadmap-title">{status} {r.topic}</div>
+                      <div className="roadmap-meta-small">
+                        <span>📅 {r.days}d</span>
+                        <span>{Math.round(r.progress || 0)}%</span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          <div className="roadmap-content fade-in">
+            {/* Floating View Toggle - Always Visible */}
+            {selectedRoadmap && (
+              <div style={{
+                position: 'fixed',
+                top: '0',
+                left: '0',
+                right: '0',
+                zIndex: '9999',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '20px',
+                padding: '20px 40px',
+                background: 'linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-secondary) 85%, transparent 100%)',
+                borderBottom: '3px solid var(--border)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+                backdropFilter: 'blur(12px)'
+              }}>
+                
+                <button onClick={() => { console.log('Switching to text'); setViewMode('text'); }} style={{
+                  padding: '14px 32px',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  background: viewMode === 'text' ? 'var(--cyan)' : 'var(--bg-tertiary)',
+                  color: viewMode === 'text' ? '#0a0f1e' : 'var(--cyan)',
+                  border: '3px solid var(--cyan)',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: viewMode === 'text' ? '0 0 20px rgba(34, 211, 238, 0.5)' : 'none',
+                  transform: viewMode === 'text' ? 'scale(1.05)' : 'scale(1)',
+                  minWidth: '140px',
+                  textAlign: 'center'
+                }}>📝 Text</button>
+                
+                <button onClick={() => { console.log('Switching to mindmap'); setViewMode('mindmap'); }} style={{
+                  padding: '14px 32px',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  background: viewMode === 'mindmap' ? 'var(--purple)' : 'var(--bg-tertiary)',
+                  color: viewMode === 'mindmap' ? '#0a0f1e' : 'var(--purple)',
+                  border: '3px solid var(--purple)',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: viewMode === 'mindmap' ? '0 0 20px rgba(168, 85, 247, 0.5)' : 'none',
+                  transform: viewMode === 'mindmap' ? 'scale(1.05)' : 'scale(1)',
+                  minWidth: '140px',
+                  textAlign: 'center'
+                }}>🗺️ Mind</button>
+                
+                <button onClick={() => { console.log('Switching to flowchart'); setViewMode('flowchart'); }} style={{
+                  padding: '14px 32px',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  background: viewMode === 'flowchart' ? '#10b981' : 'var(--bg-tertiary)',
+                  color: viewMode === 'flowchart' ? '#0a0f1e' : '#10b981',
+                  border: '3px solid #10b981',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: viewMode === 'flowchart' ? '0 0 20px rgba(16, 185, 129, 0.5)' : 'none',
+                  transform: viewMode === 'flowchart' ? 'scale(1.05)' : 'scale(1)',
+                  minWidth: '140px',
+                  textAlign: 'center'
+                }}>📊 Flow</button>
+              </div>
+            )}
+            {selectedRoadmap && roadmapContent ? (
+              <>
+                <h1 style={{ marginTop: '80px', marginBottom: '12px', color: 'var(--cyan)' }}>{selectedRoadmap.topic}</h1>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>
+                  📅 {selectedRoadmap.days} days • 📊 {Math.round(selectedRoadmap.progress || 0)}% complete
+                </p>
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+                  <button onClick={() => onPageChange('dashboard')} style={{
+                    padding: '10px 20px',
+                    background: 'linear-gradient(135deg, var(--cyan), var(--purple))',
+                    color: '#0a0f1e',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    fontSize: '14px'
+                  }}>⬅️ Back to Dashboard</button>
+                  <button onClick={handleDeleteRoadmap} style={{
+                    padding: '10px 20px',
+                    background: '#ef4444',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    fontSize: '14px'
+                  }}>🗑️ Delete Roadmap</button>
+                </div>
+
+                {viewMode === 'text' && roadmapContent && roadmapContent.split(/📅\s*DAY\s+\d+|🚀.*?📅|===.*?\n/gi).filter(s => s.trim().length > 10).map((section, i) => {
+                  if (!section.trim()) return null;
+                  const lines = section.split('\n').filter(l => l.trim());
+                  const dayNum = i + 1;
+                  return (
+                    <div key={i} className="day-section" style={{
+                      background: `linear-gradient(135deg, ${i % 2 === 0 ? 'rgba(34, 211, 238, 0.1)' : 'rgba(167, 139, 250, 0.1)'}, rgba(34, 211, 238, 0.05))`,
+                      border: '1px solid var(--border)',
+                      borderRadius: '12px',
+                      padding: '24px',
+                      marginBottom: '16px'
+                    }}>
+                      <div className="day-header" style={{
+                        fontSize: '1.3rem',
+                        fontWeight: '700',
+                        color: i % 2 === 0 ? 'var(--cyan)' : 'var(--purple)',
+                        marginBottom: '16px'
+                      }}>
+                        📅 DAY {dayNum}
+                      </div>
+                      {lines.slice(0, 1).map((line, j) => (
+                        <div key={j} style={{
+                          fontSize: '1rem',
+                          fontWeight: '600',
+                          color: 'var(--text-primary)',
+                          marginBottom: '12px'
+                        }}>{line}</div>
+                      ))}
+                      {lines.slice(1).map((line, j) => renderContentLine(line, j))}
+                      <div style={{ display: 'flex', gap: '12px', marginTop: '16px', flexWrap: 'wrap' }}>
+                        <label className="task-checkbox" style={{ flex: 1, minWidth: '150px' }}>
+                          <input
+                            type="checkbox"
+                            checked={progress[`day_${i}`] || false}
+                            onChange={() => handleCheckTask(i)}
+                          />
+                          <span>Mark day as complete</span>
+                        </label>
+                        <button onClick={() => generateQuizQuestions(dayNum)} style={{
+                          padding: '8px 16px',
+                          background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                          color: '#000',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: loadingQuiz ? 'not-allowed' : 'pointer',
+                          fontWeight: '600',
+                          fontSize: '14px'
+                        }} disabled={loadingQuiz}>
+                          {loadingQuiz ? '⏳ Loading...' : `📝 Take Quiz`}
+                        </button>
+                        {badges[dayNum] && (
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '8px 16px',
+                            background: badges[dayNum]?.includes('PERFECT') ? 'rgba(251, 191, 36, 0.2)' : 'var(--bg-tertiary)',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            color: 'var(--cyan)',
+                            border: '1px solid var(--border)'
+                          }}>
+                            <span>{badges[dayNum]}</span>
+                            {topicAccuracy && Object.keys(topicAccuracy).length > 0 && (
+                              <button 
+                                onClick={() => {
+                                  alert(`📊 Day ${dayNum} - Per-Topic Accuracy:\n\n${Object.entries(topicAccuracy).map(([t, a]) => `${t}: ${a}%`).join('\n')}\n\nWeak Topics (< 60%): ${Object.entries(topicAccuracy).filter(([_, a]) => a < 60).map(([t]) => t).join(', ') || 'None'}`);
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: 'var(--cyan)',
+                                  cursor: 'pointer',
+                                  padding: '0',
+                                  fontSize: '14px'
+                                }}
+                                title="View detailed topic accuracy"
+                              >
+                                📊
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Per-Topic Accuracy Display */}
+                      {badges[dayNum] && topicAccuracy && Object.keys(topicAccuracy).length > 0 && (
+                        <div style={{
+                          marginTop: '16px',
+                          padding: '16px',
+                          background: 'var(--bg-primary)',
+                          borderRadius: '8px',
+                          border: '1px solid var(--border)'
+                        }}>
+                          <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--cyan)', marginBottom: '12px' }}>📊 TOPIC BREAKDOWN</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {Object.entries(topicAccuracy).map(([topic, accuracy]) => {
+                              const isWeak = accuracy < 60;
+                              const isMastered = accuracy === 100;
+                              return (
+                                <div key={topic} style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  fontSize: '11px',
+                                  padding: '8px',
+                                  borderRadius: '6px',
+                                  background: isWeak ? 'rgba(239, 68, 68, 0.1)' : isMastered ? 'rgba(16, 185, 129, 0.1)' : 'rgba(34, 211, 238, 0.1)',
+                                  border: `1px solid ${isWeak ? 'rgba(239, 68, 68, 0.3)' : isMastered ? 'rgba(16, 185, 129, 0.3)' : 'rgba(34, 211, 238, 0.3)'}`
+                                }}>
+                                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span>{isWeak ? '⚠️' : isMastered ? '⭐' : '✅'}</span>
+                                    <span style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>{topic}</span>
+                                  </span>
+                                  <span style={{
+                                    color: isWeak ? '#fca5a5' : isMastered ? '#86efac' : 'var(--cyan)',
+                                    fontWeight: '700'
+                                  }}>
+                                    {accuracy}%
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          {Object.values(topicAccuracy).some(acc => acc < 60) && (
+                            <div style={{
+                              marginTop: '12px',
+                              paddingTop: '12px',
+                              borderTop: '1px solid var(--border)',
+                              fontSize: '10px',
+                              color: '#fca5a5',
+                              fontWeight: '600'
+                            }}>
+                              ⚠️ Weak Topics: {Object.entries(topicAccuracy).filter(([_, a]) => a < 60).map(([t]) => t).join(', ')} - Need practice! 📚
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {viewMode === 'mindmap' && mermaidDiagram && (
+                  <div style={{
+                    marginBottom: '24px'
+                  }} dangerouslySetInnerHTML={{__html: mermaidDiagram}}>
+                  </div>
+                )}
+
+                {viewMode === 'flowchart' && mermaidDiagram && (
+                  <div style={{
+                    marginBottom: '24px'
+                  }} dangerouslySetInnerHTML={{__html: mermaidDiagram}}>
+                  </div>
+                )}
+
+                <div className="doubt-section">
+                  <h3>💬 Ask a Doubt</h3>
+                  <form onSubmit={handleAskDoubt} className="doubt-form">
+                    <input
+                      type="text"
+                      value={doubt}
+                      onChange={(e) => setDoubt(e.target.value)}
+                      placeholder="Ask anything about the topic..."
+                      disabled={loadingDoubt}
+                    />
+                    <button type="submit" disabled={loadingDoubt} style={{
+                      padding: '12px 24px',
+                      background: 'linear-gradient(135deg, var(--purple), var(--cyan))',
+                      color: '#0a0f1e',
+                      fontWeight: '600',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: loadingDoubt ? 'not-allowed' : 'pointer'
+                    }}>
+                      {loadingDoubt ? '⏳' : '🔍'} Ask
+                    </button>
+                  </form>
+                  {doubtAnswer && (
+                    <div className="doubt-answer" style={{
+                      background: 'var(--bg-primary)',
+                      borderLeft: '3px solid var(--cyan)',
+                      padding: '16px',
+                      borderRadius: '6px',
+                      marginTop: '16px',
+                      color: 'var(--text-secondary)',
+                      lineHeight: '1.6'
+                    }}>
+                      <p>{doubtAnswer}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* QUIZ MODAL */}
+                {showQuiz && (
+                  <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(0, 0, 0, 0.7)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000
+                  }}>
+                    <div style={{
+                      background: 'var(--bg-secondary)',
+                      borderRadius: '12px',
+                      padding: '32px',
+                      maxWidth: '600px',
+                      width: '90%',
+                      maxHeight: '85vh',
+                      overflowY: 'auto',
+                      border: '2px solid var(--cyan)',
+                      boxShadow: '0 0 40px rgba(34, 211, 238, 0.3)'
+                    }}>
+                      {quizScore === null ? (
+                        <>
+                          <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: '24px'
+                          }}>
+                            <h2 style={{ color: 'var(--cyan)', margin: 0 }}>📝 Day {currentDayQuiz} Quiz</h2>
+                            <button onClick={handleCloseQuiz} style={{
+                              background: 'var(--bg-tertiary)',
+                              border: 'none',
+                              borderRadius: '6px',
+                              padding: '8px 12px',
+                              cursor: 'pointer',
+                              fontSize: '18px'
+                            }}>✕</button>
+                          </div>
+                          
+                          <div style={{ marginBottom: '20px', color: 'var(--text-secondary)' }}>
+                            Question {currentQuestionIdx + 1} of {quizQuestions.length}
+                          </div>
+                          
+                          {quizQuestions[currentQuestionIdx] && (
+                            <>
+                              <div style={{
+                                background: 'linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(167, 139, 250, 0.1))',
+                                padding: '20px',
+                                borderRadius: '8px',
+                                marginBottom: '24px',
+                                borderLeft: '4px solid var(--cyan)'
+                              }}>
+                                <h3 style={{ color: 'var(--text-primary)', margin: '0 0 16px 0' }}>
+                                  {quizQuestions[currentQuestionIdx].question}
+                                </h3>
+                              </div>
+                              
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+                                {quizQuestions[currentQuestionIdx].options.map((option, idx) => (
+                                  <button
+                                    key={idx}
+                                    onClick={() => handleQuizAnswer(idx)}
+                                    style={{
+                                      padding: '14px 16px',
+                                      background: userAnswers[currentQuestionIdx] === idx ? 'linear-gradient(135deg, var(--cyan), var(--purple))' : 'var(--bg-tertiary)',
+                                      color: userAnswers[currentQuestionIdx] === idx ? '#0a0f1e' : 'var(--text-primary)',
+                                      border: userAnswers[currentQuestionIdx] === idx ? '2px solid var(--cyan)' : '1px solid var(--border)',
+                                      borderRadius: '8px',
+                                      cursor: 'pointer',
+                                      fontWeight: userAnswers[currentQuestionIdx] === idx ? '600' : '500',
+                                      transition: 'all 0.3s',
+                                      textAlign: 'left'
+                                    }}
+                                  >
+                                    <span style={{ marginRight: '12px' }}>{String.fromCharCode(65 + idx)})</span>
+                                    {option}
+                                  </button>
+                                ))}
+                              </div>
+                              
+                              <div style={{ display: 'flex', gap: '12px', justifyContent: 'space-between' }}>
+                                <button onClick={() => setCurrentQuestionIdx(Math.max(0, currentQuestionIdx - 1))} style={{
+                                  padding: '10px 20px',
+                                  background: 'var(--bg-tertiary)',
+                                  color: 'var(--text-primary)',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer'
+                                }} disabled={currentQuestionIdx === 0}>⬅️ Previous</button>
+                                
+                                {currentQuestionIdx < quizQuestions.length - 1 ? (
+                                  <button onClick={() => setCurrentQuestionIdx(currentQuestionIdx + 1)} style={{
+                                    padding: '10px 20px',
+                                    background: 'linear-gradient(135deg, var(--cyan), var(--purple))',
+                                    color: '#0a0f1e',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontWeight: '600'
+                                  }}>Next ➡️</button>
+                                ) : (
+                                  <button onClick={handleSubmitQuiz} style={{
+                                    padding: '10px 20px',
+                                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontWeight: '600'
+                                  }}>Submit Quiz 🎯</button>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <div style={{ textAlign: 'center' }}>
+                            {/* Badge Celebration */}
+                            <div style={{
+                              fontSize: '80px',
+                              marginBottom: '16px',
+                              animation: 'pulse 1s ease-in-out infinite'
+                            }}>
+                              {badges[currentDayQuiz]?.includes('PERFECT') ? '🏆' : badges[currentDayQuiz]?.includes('EXCELLENT') ? '🥇' : badges[currentDayQuiz]?.includes('GOOD') ? '🥈' : badges[currentDayQuiz]?.includes('FAIR') ? '🥉' : '📚'}
+                            </div>
+                            <h2 style={{ color: 'var(--cyan)', margin: '0 0 12px 0', fontSize: '1.8rem' }}>{badges[currentDayQuiz]}</h2>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '16px', margin: '0 0 32px 0' }}>
+                              You got <span style={{ color: 'var(--cyan)', fontWeight: '700' }}>{userAnswers.filter((ans, idx) => ans === quizQuestions[idx]?.correct).length}/{quizQuestions.length}</span> correct!
+                            </p>
+                            
+                            {/* Per-Topic Accuracy */}
+                            {Object.keys(topicAccuracy).length > 0 && (
+                              <div style={{
+                                background: 'var(--bg-primary)',
+                                borderRadius: '12px',
+                                padding: '24px',
+                                marginBottom: '24px',
+                                textAlign: 'left',
+                                border: '1px solid var(--border)'
+                              }}>
+                                <h3 style={{ color: 'var(--cyan)', marginTop: 0, marginBottom: '16px', fontSize: '1.1rem' }}>📊 Per-Topic Accuracy</h3>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                  {Object.entries(topicAccuracy).map(([topic, accuracy]) => {
+                                    const isWeak = accuracy < 60;
+                                    const isMastered = accuracy === 100;
+                                    return (
+                                      <div key={topic} style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        padding: '12px',
+                                        borderRadius: '8px',
+                                        background: isWeak ? 'rgba(239, 68, 68, 0.1)' : isMastered ? 'rgba(16, 185, 129, 0.1)' : 'rgba(34, 211, 238, 0.1)',
+                                        border: `1px solid ${isWeak ? 'rgba(239, 68, 68, 0.3)' : isMastered ? 'rgba(16, 185, 129, 0.3)' : 'rgba(34, 211, 238, 0.3)'}`
+                                      }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                                          <span style={{ fontSize: '1.2rem' }}>
+                                            {isWeak ? '⚠️' : isMastered ? '⭐' : '✅'}
+                                          </span>
+                                          <span style={{ 
+                                            color: 'var(--text-primary)',
+                                            fontWeight: '600',
+                                            minWidth: '120px'
+                                          }}>
+                                            {topic}
+                                          </span>
+                                        </div>
+                                        <div style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '12px'
+                                        }}>
+                                          <div style={{
+                                            width: '100px',
+                                            height: '6px',
+                                            background: 'var(--bg-tertiary)',
+                                            borderRadius: '3px',
+                                            overflow: 'hidden'
+                                          }}>
+                                            <div style={{
+                                              height: '100%',
+                                              width: accuracy + '%',
+                                              background: isWeak ? 'linear-gradient(90deg, #ef4444, #dc2626)' : isMastered ? 'linear-gradient(90deg, #10b981, #059669)' : 'linear-gradient(90deg, #22d3ee, #0891b2)',
+                                              transition: 'width 0.5s ease-out'
+                                            }}></div>
+                                          </div>
+                                          <span style={{
+                                            color: isWeak ? '#fca5a5' : isMastered ? '#86efac' : 'var(--cyan)',
+                                            fontWeight: '700',
+                                            minWidth: '50px',
+                                            textAlign: 'right'
+                                          }}>
+                                            {accuracy}%
+                                          </span>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Weak Topics Warning */}
+                            {Object.entries(topicAccuracy).filter(([_, acc]) => acc < 60).length > 0 && (
+                              <div style={{
+                                background: 'rgba(239, 68, 68, 0.15)',
+                                border: '2px solid rgba(239, 68, 68, 0.3)',
+                                borderRadius: '12px',
+                                padding: '16px',
+                                marginBottom: '24px',
+                                textAlign: 'left'
+                              }}>
+                                <h4 style={{ color: '#fca5a5', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  ⚠️ Weak Topics (Accuracy &lt; 60%)
+                                </h4>
+                                <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--text-secondary)' }}>
+                                  {Object.entries(topicAccuracy)
+                                    .filter(([_, acc]) => acc < 60)
+                                    .map(([topic, acc]) => (
+                                      <li key={topic} style={{ marginBottom: '8px' }}>
+                                        <strong>{topic}</strong> - {acc}% accuracy. Need more practice! 📚
+                                      </li>
+                                    ))}
+                                </ul>
+                              </div>
+                            )}
+                            
+                            {/* Strong Topics */}
+                            {Object.entries(topicAccuracy).filter(([_, acc]) => acc === 100).length > 0 && (
+                              <div style={{
+                                background: 'rgba(16, 185, 129, 0.15)',
+                                border: '2px solid rgba(16, 185, 129, 0.3)',
+                                borderRadius: '12px',
+                                padding: '16px',
+                                marginBottom: '24px',
+                                textAlign: 'left'
+                              }}>
+                                <h4 style={{ color: '#86efac', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  🌟 Mastered Topics (100% Accuracy)
+                                </h4>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                  {Object.entries(topicAccuracy)
+                                    .filter(([_, acc]) => acc === 100)
+                                    .map(([topic, _]) => (
+                                      <span key={topic} style={{
+                                        background: 'linear-gradient(135deg, #10b981, #059669)',
+                                        color: '#fff',
+                                        padding: '6px 14px',
+                                        borderRadius: '20px',
+                                        fontSize: '0.9rem',
+                                        fontWeight: '600'
+                                      }}>
+                                        ✨ {topic}
+                                      </span>
+                                    ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            <button onClick={handleCloseQuiz} style={{
+                              padding: '14px 32px',
+                              background: 'linear-gradient(135deg, var(--cyan), var(--purple))',
+                              color: '#0a0f1e',
+                              border: 'none',
+                              borderRadius: '8px',
+                              cursor: 'pointer',
+                              fontWeight: '700',
+                              fontSize: '16px',
+                              boxShadow: '0 0 20px rgba(34, 211, 238, 0.3)',
+                              transition: 'all 0.3s'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = 'translateY(-2px)';
+                              e.currentTarget.style.boxShadow = '0 0 30px rgba(34, 211, 238, 0.5)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = 'translateY(0)';
+                              e.currentTarget.style.boxShadow = '0 0 20px rgba(34, 211, 238, 0.3)';
+                            }}>
+                              ✅ Close & Continue 🚀
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🗺️</div>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Select a roadmap to view its content</p>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    function ProgressPage({ user, roadmaps }) {
+      const totalDays = roadmaps.reduce((sum, r) => sum + (r.days || 0), 0);
+      const weeklyData = [
+        { day: 'Mon', hours: 2 },
+        { day: 'Tue', hours: 3 },
+        { day: 'Wed', hours: 1 },
+        { day: 'Thu', hours: 4 },
+        { day: 'Fri', hours: 2 },
+        { day: 'Sat', hours: 3 },
+        { day: 'Sun', hours: 2 }
+      ];
+      const maxHours = 4;
+
+      const achievements = [
+        { id: 1, name: 'Quick Learner', icon: '⚡', unlocked: true },
+        { id: 2, name: '7-Day Streak', icon: '🔥', unlocked: user?.streak >= 7 },
+        { id: 3, name: 'First Roadmap', icon: '🚀', unlocked: roadmaps.length > 0 },
+        { id: 4, name: 'Master', icon: '👑', unlocked: roadmaps.filter(r => r.status === 'completed').length >= 5 },
+        { id: 5, name: 'Social Butterfly', icon: '🦋', unlocked: user?.level >= 5 },
+        { id: 6, name: 'XP Collector', icon: '💎', unlocked: user?.xp >= 1000 }
+      ];
+
+      return (
+        <div className="fade-in">
+          <h1 style={{ color: 'var(--cyan)', marginBottom: '8px' }}>📈 Your Learning Progress</h1>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '30px' }}>Track your achievements and learning trends</p>
+
+          <div className="analytics-grid">
+            <div className="analytics-card">
+              <div className="card-icon">📅</div>
+              <div>
+                <div className="card-value">{totalDays}</div>
+                <div className="card-label">Total Learning Days</div>
+              </div>
+            </div>
+            <div className="analytics-card">
+              <div className="card-icon">✅</div>
+              <div>
+                <div className="card-value">{Math.floor(totalDays * 0.4)}</div>
+                <div className="card-label">Days Completed</div>
+              </div>
+            </div>
+            <div className="analytics-card">
+              <div className="card-icon">⭐</div>
+              <div>
+                <div className="card-value">{user?.level || 1}</div>
+                <div className="card-label">Current Level</div>
+              </div>
+            </div>
+            <div className="analytics-card">
+              <div className="card-icon">🔥</div>
+              <div>
+                <div className="card-value">{user?.streak || 0}</div>
+                <div className="card-label">Day Streak</div>
+              </div>
+            </div>
+            <div className="analytics-card">
+              <div className="card-icon">💫</div>
+              <div>
+                <div className="card-value">{user?.xp || 0}</div>
+                <div className="card-label">Total XP</div>
+              </div>
+            </div>
+            <div className="analytics-card">
+              <div className="card-icon">🎯</div>
+              <div>
+                <div className="card-value">{roadmaps.filter(r => r.status === 'completed').length}</div>
+                <div className="card-label">Completed Roadmaps</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="activity-section">
+            <h2>📊 Weekly Activity</h2>
+            <div className="chart-container">
+              {weeklyData.map((item, i) => {
+                const height = (item.hours / maxHours) * 100;
+                return (
+                  <div key={i} className="chart-bar-group">
+                    <div style={{
+                      height: '180px',
+                      display: 'flex',
+                      alignItems: 'flex-end',
+                      justifyContent: 'center',
+                      width: '100%'
+                    }}>
+                      <div
+                        className="chart-bar"
+                        style={{
+                          height: `${Math.max(height, 20)}px`,
+                          opacity: 0.6 + (height / 100) * 0.4
+                        }}
+                      ></div>
+                    </div>
+                    <div className="chart-label">{item.day}</div>
+                    <div className="chart-value">{item.hours}h</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="achievements-section">
+            <h2>🏆 Achievements</h2>
+            <div className="badges-container">
+              {achievements.map(badge => (
+                <div key={badge.id} className={`badge ${badge.unlocked ? 'unlocked' : 'locked'}`}>
+                  <div className="badge-icon">{badge.icon}</div>
+                  <div className="badge-name">{badge.name}</div>
+                  {!badge.unlocked && <div className="badge-lock">🔒</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    console.log('✅ React App Rendered Successfully!');
+  </script>
+
+</body>
+</html>

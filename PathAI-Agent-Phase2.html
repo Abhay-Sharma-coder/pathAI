@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PathAI Pro | Phase 2 - Hackathon Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="PathAI-Agent.css">
+</head>
+
+<body class="min-h-screen p-4 flex flex-col items-center pb-24">
+
+    <!-- MAIN APP SCREEN (Always Visible) -->
+    <div id="appSection" class="w-full">
+        <div class="max-w-3xl w-full mx-auto">
+
+            <!-- User Profile Card / Guest Mode -->
+            <div id="userProfile"></div>
+
+            <!-- Main App Card -->
+            <div class="glass-card rounded-3xl p-8 shadow-2xl mt-4 border border-purple-500/20">
+                <header class="text-center mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <div></div>
+                        <h1 class="text-5xl font-extrabold gradient-text tracking-tighter">PathAI Agent</h1>
+                        <button onclick="showLoginModal()" id="guestLoginBtn" class="px-4 py-2 bg-indigo-600 rounded-lg text-sm font-bold text-white hover:bg-indigo-700 hidden">Login/Signup</button>
+                    </div>
+                    <p class="text-gray-400 text-sm font-medium tracking-wide uppercase">Advanced Learning Management System</p>
+                </header>
+
+                <!-- Input Section -->
+                <div class="space-y-4 mb-8">
+                    <div class="flex gap-3">
+                        <input type="text" id="userPrompt" placeholder="What do you want to master today?" class="flex-grow p-4 rounded-2xl bg-gray-900 border border-gray-700 outline-none focus:border-purple-500 transition-all text-white placeholder-gray-500">
+                        <button onclick="clearData()" title="Reset Roadmap" class="px-5 bg-gray-800 rounded-2xl hover:bg-red-900/40 border border-gray-700 transition-all group">
+                            <i class="fas fa-undo-alt text-gray-400 group-hover:text-red-400"></i>
+                        </button>
+                    </div>
+                    <button id="buildBtn" onclick="generatePath()" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl font-black text-lg hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all flex items-center justify-center gap-3">
+                        <i class="fas fa-brain"></i> GENERATE SMART ROADMAP
+                    </button>
+                </div>
+
+                <!-- Loader -->
+                <div id="loader" class="hidden text-center py-10">
+                    <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"></div>
+                    <p class="text-purple-400 font-bold animate-pulse">AI Agent is performing deep research... 🚀</p>
+                </div>
+
+                <!-- Results Area -->
+                <div id="resultArea" class="hidden mt-8">
+                    <!-- Buttons will be added here by JavaScript -->
+                </div>
+
+                <!-- Doubt Solver Section -->
+                <div id="doubtSolverSection" class="mt-8 p-6 bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-2xl border border-purple-500/30 hidden">
+                    <h3 class="text-xl font-bold text-purple-300 mb-4">❓ Ask a Doubt</h3>
+                    <div class="space-y-3">
+                        <input type="text" id="doubtInput" placeholder="Ask any question about the topics..." class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:border-purple-500 transition">
+                        <button onclick="askDoubt()" class="w-full py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white font-bold transition">🚀 Get Answer</button>
+                        <div id="doubtAnswer" class="mt-3 p-3 bg-gray-800/50 rounded-lg border border-purple-500/30 hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Saved Roadmaps History -->
+                <div id="roadmapHistory" class="mt-8 p-6 bg-gray-900/60 rounded-2xl border border-gray-800 hidden">
+                    <h3 class="text-lg font-bold text-blue-300 mb-4">📚 Saved Roadmaps</h3>
+                    <div id="historyList" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize checkin button visibility
+        window.addEventListener('load', function() {
+            if (localStorage.getItem('authToken')) {
+                document.getElementById('checkinBtn').classList.remove('hidden');
+            }
+        });
+    </script>
+    <script src="PathAI-Agent-new.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,122 @@
+/* Badges Container */
+.badges-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+/* Badge */
+.badge {
+  background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+  min-height: 160px;
+  justify-content: center;
+}
+
+.badge:hover {
+  border-color: var(--purple);
+  transform: translateY(-8px);
+}
+
+.badge.unlocked {
+  border-color: var(--cyan);
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(167, 139, 250, 0.1));
+}
+
+.badge.unlocked:hover {
+  box-shadow: 0 0 30px rgba(34, 211, 238, 0.3);
+  border-color: var(--cyan);
+}
+
+.badge.locked {
+  opacity: 0.6;
+}
+
+.badge.locked:hover {
+  opacity: 0.8;
+}
+
+.badge-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  display: block;
+  line-height: 1;
+  animation: none;
+}
+
+.badge.unlocked .badge-icon {
+  animation: badgePulse 2s infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.badge-name {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+
+.badge.unlocked .badge-name {
+  color: var(--cyan);
+}
+
+.badge-lock {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+/* Badge Description */
+.badge-desc {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.badge.unlocked .badge-desc {
+  color: var(--cyan);
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .badges-container {
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 12px;
+  }
+
+  .badge {
+    padding: 16px;
+    min-height: 130px;
+  }
+
+  .badge-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+  }
+
+  .badge-name {
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+  }
+}

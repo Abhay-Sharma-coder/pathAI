@@ -1,0 +1,315 @@
+### PathAI Phase 2 - REST API Examples
+### Copy these cURL commands or use in Postman/Thunder Client
+
+## Variables
+@baseUrl = http://localhost:5000/api
+@token = <your_jwt_token_from_login>
+
+---
+
+## 1. SIGNUP
+POST {{baseUrl}}/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Abhay Sharma",
+  "email": "abhay@learningpath.com",
+  "password": "SecurePass123!",
+  "learningGoal": "Master React and TypeScript"
+}
+
+### Response:
+{
+  "message": "User registered successfully",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "65abc123def456...",
+    "name": "Abhay Sharma",
+    "email": "abhay@learningpath.com"
+  }
+}
+
+---
+
+## 2. LOGIN
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "abhay@learningpath.com",
+  "password": "SecurePass123!"
+}
+
+---
+
+## 3. GET CURRENT USER PROFILE
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+---
+
+## 4. UPDATE PROFILE
+PUT {{baseUrl}}/auth/update
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "learningGoal": "Advanced React + Node.js",
+  "learningStyle": "visual"
+}
+
+---
+
+## 5. GENERATE ROADMAP (via n8n proxy)
+POST {{baseUrl}}/n8n/generate-roadmap
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "topic": "Python for Data Science"
+}
+
+### Response:
+{
+  "success": true,
+  "roadmap": {
+    "id": "65def789...",
+    "content": "📅 DAY 1:\n• Learn Python basics\n...",
+    "topic": "Python for Data Science"
+  }
+}
+
+---
+
+## 6. GET ALL ROADMAPS (History)
+GET {{baseUrl}}/roadmaps
+Authorization: Bearer {{token}}
+
+### Response:
+{
+  "total": 3,
+  "roadmaps": [
+    {
+      "id": "65abc123...",
+      "topic": "React Advanced",
+      "status": "active",
+      "progress": 45,
+      "currentDay": 6,
+      "totalDays": 30,
+      "difficulty": "intermediate",
+      "createdAt": "2026-03-26T08:30:00Z",
+      "completionDate": null
+    }
+  ]
+}
+
+---
+
+## 7. GET ROADMAP DETAILS
+GET {{baseUrl}}/roadmaps/65abc123def456
+Authorization: Bearer {{token}}
+
+---
+
+## 8. MARK DAY AS COMPLETED
+POST {{baseUrl}}/roadmaps/65abc123def456/complete-day
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "dayNumber": 5
+}
+
+### Response:
+{
+  "message": "Day marked complete",
+  "progress": 45
+}
+
+---
+
+## 9. DAILY CHECK-IN (Streak)
+POST {{baseUrl}}/streak/checkin
+Authorization: Bearer {{token}}
+
+### Response:
+{
+  "message": "Check-in successful",
+  "currentStreak": 7,
+  "longestStreak": 10,
+  "xpGain": 10
+}
+
+---
+
+## 10. GET STREAK STATS
+GET {{baseUrl}}/streak/stats
+Authorization: Bearer {{token}}
+
+### Response:
+{
+  "currentStreak": 7,
+  "longestStreak": 10,
+  "lastCheckIn": "2026-03-26T09:00:00Z",
+  "frozenDays": 0
+}
+
+---
+
+## 11. FREEZE STREAK (once per month)
+POST {{baseUrl}}/streak/freeze
+Authorization: Bearer {{token}}
+
+### Response:
+{
+  "message": "Streak frozen for 1 day"
+}
+
+---
+
+## 12. GENERATE QUIZ
+POST {{baseUrl}}/quiz/generate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "topic": "React Hooks",
+  "dayNumber": 5,
+  "roadmapId": "65abc123..."
+}
+
+### Response:
+{
+  "quiz": {
+    "topic": "React Hooks",
+    "dayNumber": 5,
+    "questions": [
+      {
+        "question": "What is the fundamental concept of React Hooks?",
+        "options": ["Option A", "Option B", "Option C", "Option D"],
+        "correctAnswer": "Option A"
+      }
+    ],
+    "totalQuestions": 3
+  }
+}
+
+---
+
+## 13. SUBMIT QUIZ
+POST {{baseUrl}}/quiz/submit
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "topic": "React Hooks",
+  "dayNumber": 5,
+  "roadmapId": "65abc123...",
+  "answers": [
+    { "questionIndex": 0, "selected": "Option A" },
+    { "questionIndex": 1, "selected": "Method 1" },
+    { "questionIndex": 2, "selected": "Benefit 1" }
+  ]
+}
+
+### Response:
+{
+  "score": 100,
+  "passed": true,
+  "xpGain": 50,
+  "userLevel": 3,
+  "userXP": 250,
+  "badges": ["7day_streak", "quiz_master"],
+  "message": "✅ Quiz Passed!"
+}
+
+---
+
+## 14. QUIZ HISTORY
+GET {{baseUrl}}/quiz/history
+Authorization: Bearer {{token}}
+
+### Response:
+{
+  "stats": {
+    "totalAttempts": 5,
+    "passed": 4,
+    "avgScore": 82
+  },
+  "recentQuizzes": [
+    {
+      "topic": "React Hooks",
+      "score": 100,
+      "passed": true,
+      "createdAt": "2026-03-26T09:30:00Z"
+    }
+  ]
+}
+
+---
+
+## 15. ASK DOUBT (via n8n proxy)
+POST {{baseUrl}}/n8n/doubt-solver
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "question": "How do I use useState hook in React?"
+}
+
+### Response:
+{
+  "answer": "useState is a Hook that lets you add state to functional components. Usage: const [state, setState] = useState(initialValue);"
+}
+
+---
+
+## 16. HEALTH CHECK
+GET {{baseUrl}}/health
+
+### Response:
+{
+  "status": "Backend Online ✅"
+}
+
+---
+
+## TESTING WORKFLOW
+
+### Session Flow (Complete User Journey)
+1. POST /auth/signup → Get token
+2. POST /n8n/generate-roadmap → Create roadmap
+3. GET /roadmaps → See all roadmaps
+4. POST /streak/checkin → Daily check-in
+5. POST /quiz/generate → Start quiz
+6. POST /quiz/submit → Submit answers
+7. GET /auth/me → See updated profile (XP, level, badges)
+
+---
+
+## POSTMAN COLLECTION SETUP
+
+Import this as a Postman environment:
+```json
+{
+  "name": "PathAI Phase 2",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "enabled": true
+    },
+    {
+      "key": "token",
+      "value": "",
+      "enabled": true
+    }
+  ]
+}
+```
+
+After signup, copy the token into the `token` variable.
+
+---
+
+**All endpoints tested and ready for production!** 🚀
