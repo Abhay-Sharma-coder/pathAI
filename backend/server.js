@@ -46,6 +46,14 @@ app.use('/api/streak', streakRoutes);
 app.use('/api/adaptive/quiz', adaptiveQuizRoutes);
 app.use('/api/adaptive/doubt', adaptiveDoubtRoutes);
 
+// Serve Static Files from frontend
+app.use(express.static(__dirname + '/public'));
+
+// SPA Fallback Route - serve index.html for non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(__dirname + '/public/index.html');
+});
+
 // Error Handler
 app.use((err, req, res, next) => {
   console.error('Error:', err.message);
